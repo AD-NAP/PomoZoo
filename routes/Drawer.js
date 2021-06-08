@@ -1,27 +1,24 @@
-import React from "react";
-import { createDrawerNavigator } from "@react-navigation/drawer";
+import React from 'react';
+import 'react-native-gesture-handler';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import TimerStack from "./TimerStack";
 import ViewZooStack from "./ViewZooStack";
 import TodoStack from "./TodoStack";
 import LoginStack from "./LoginStack";
-import { createStackNavigator } from "@react-navigation/stack";
 
-const RootDrawerNavigator = createDrawerNavigator();
+
+const Tab = createBottomTabNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <RootDrawerNavigator.Navigator>
-        <RootDrawerNavigator.Screen name="Login" component={LoginStack} options={{
-          drawerLabel: () => null,
-          title: null,
-          drawerIcon: () => null
-        }} />
-        <RootDrawerNavigator.Screen name="Home" component={TimerStack} />
-        <RootDrawerNavigator.Screen name="View Zoo" component={ViewZooStack} />
-        <RootDrawerNavigator.Screen name="Todo" component={TodoStack} />
-      </RootDrawerNavigator.Navigator>
+        <Tab.Navigator>
+        <Tab.Screen name="Login" component={LoginStack} />
+          <Tab.Screen name="Home" component={TimerStack} />
+          <Tab.Screen name="View Zoo" component={ViewZooStack} />
+          <Tab.Screen name="Todo" component={TodoStack} />
+        </Tab.Navigator>
     </NavigationContainer>
   );
 }
