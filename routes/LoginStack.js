@@ -5,7 +5,7 @@ import SignUp from '../screens/SignUp';
 const { Navigator, Screen } = createStackNavigator();
 
 
-const LoginStack = ({ navigation }) => (
+const LoginStack = () => (
         <Navigator>
             <Screen name="Sign Up" component={SignUp} />
             <Screen
