@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import 'react-native-gesture-handler';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Icon from 'react-native-vector-icons/Ionicons';
 import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer } from "@react-navigation/native";
 import TimerStack from "./TimerStack";
@@ -52,16 +53,34 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Tab.Navigator>
+      <Tab.Navigator screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+
+            if (route.name === 'Home') {
+              iconName = focused ? 'ios-stopwatch' : 'ios-stopwatch-outline';
+            } else if (route.name === 'Todo') {
+              iconName = focused ? 'ios-reader' : 'ios-reader-outline';
+            } else if (route.name === 'View Zoo') {
+              iconName = focused ? 'md-paw' : 'md-paw-outline';
+            }
+
+            // You can return any component that you like here!
+            return <Icon name={iconName} size={size} color={color} />;
+          },
+        })}
+        tabBarOptions={{
+          activeTintColor: '#f28482',
+          inactiveTintColor: 'gray',
+        }}>
         {user ? (
           <>
-              <Tab.Screen name="View Zoo" component={ViewZooStack} />
-              <Tab.Screen name="Home" component={TimerStack} />
-              {props => <HomeScreen {...props} extraData={user} />}
-              <Tab.Screen name="Todo" component={TodoStack} />
+            <Tab.Screen name="Home" component={TimerStack} />
+            <Tab.Screen name="Todo" component={TodoStack} />
+            <Tab.Screen name="View Zoo" component={ViewZooStack} />
           </>
         ) : (
-            <Tab.Screen name="Login" component={LoginStack} options={{ headerShown: false, tabBarVisible: false }} />
+          <Tab.Screen name="Login" component={LoginStack} options={{ tabBarVisible: false }} />
         )}
       </Tab.Navigator>
     </NavigationContainer>

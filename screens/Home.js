@@ -35,7 +35,6 @@ export default function Home({ route, navigation }) {
 
     return (
         <View style={globalStyles.container}>
-            <Text>Timer</Text>
             <ThemeProvider theme={theme}>
                 <Button title="1 hour" onPress={() => navigation.navigate('Timer', { cycle: 4 })} />
                 <Button title="2 hours" onPress={() => navigation.navigate('Timer', { cycle: 8 })} />

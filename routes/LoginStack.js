@@ -6,14 +6,17 @@ const { Navigator, Screen } = createStackNavigator();
 
 
 const LoginStack = () => (
-        <Navigator>
-            <Screen name="Sign Up" component={SignUp} />
-            <Screen
-                name="Login"
-                component={Login}
-                options={{
-                    headerTitle: 'Log In Page',
-                }} />
-        </Navigator>
+    <Navigator screenOptions={{
+        headerStyle: {
+          backgroundColor: '#8682f2',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }}>
+        <Screen name="Sign Up" component={SignUp}/>
+        <Screen name="Login" component={Login}/>
+    </Navigator>
 );
 export default LoginStack;
