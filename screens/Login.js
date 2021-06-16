@@ -59,7 +59,6 @@ export default function Login({ navigation }) {
             buttonStyle: {
                 backgroundColor: '#8682f2',
                 height: 48,
-                marginBottom: 20,
             }
         },
     };
@@ -67,7 +66,7 @@ export default function Login({ navigation }) {
     return (
         <SafeAreaView style={globalStyles.container}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View style={globalStyles.container}>
+                <View style={globalStyles.innerTop}>
                     <ThemeProvider theme={pomoTheme}>
                         <Image source={require('../assets/logo.png')} />
                         <Input

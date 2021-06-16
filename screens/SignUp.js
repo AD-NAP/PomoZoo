@@ -80,7 +80,7 @@ export default function SignUp({ navigation }) {
         >
             <SafeAreaView style={globalStyles.container}>
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <View style={globalStyles.inner}>
+                    <View style={globalStyles.innerCenter}>
                         <ThemeProvider theme={pomoTheme}>
                             <Image source={require('../assets/logo.png')} />
                             <Input
