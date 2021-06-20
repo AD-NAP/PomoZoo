@@ -42,6 +42,12 @@ export const globalStyles = StyleSheet.create({
         justifyContent: "center",
         alignItems: 'stretch',
     },
+    innerTimer: {
+        padding: 20,
+        flex: 1,
+        justifyContent: "center",
+        alignItems: 'center',
+    },
     innerTop: {
         padding: 20,
         flex: 1,

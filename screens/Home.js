@@ -9,6 +9,7 @@ export default function Home({ route, navigation }) {
 
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
+    const [selectedAnimal, setSelectedAnimal] = useState(null);
 
     const Item = ({ item, onPress, backgroundColor, textColor }) => (
         <TouchableOpacity onPress={onPress} style={[globalStyles.item, backgroundColor]}>
@@ -21,34 +22,38 @@ export default function Home({ route, navigation }) {
                     borderColor: '#d35647',
                 }}
             />
-            <Text style={[globalStyles.item, textColor]}>{item.name}</Text>
+            {/* <Text style={[globalStyles.item, textColor]}>{item.name}</Text> */}
         </TouchableOpacity>
     );
 
     const renderItem = ({ item }) => {
         const backgroundColor = item.key === selectedId ? "#f28482" : "#8682f2";
-        const color = item.key === selectedId ? 'white' : 'black';
+        // const color = item.key === selectedId ? 'white' : 'black';
 
         return (
             <Item
                 item={item}
-                onPress={() => setSelectedId(item.key)}
+                onPress={() => {
+                    setSelectedId(item.key);
+                    setSelectedAnimal(item.name);
+                }}
                 backgroundColor={{ backgroundColor }}
-                textColor={{ color }}
+                // textColor={{ color }}
             />
         );
     };
 
     const [images, setimages] = useState([
-        { source: require('../assets/elephant.png'), key: "1" },
-        { source: require('../assets/hen.png'), key: "2" },
-        { source: require('../assets/koala.png'), key: "3" },
-        { source: require('../assets/owl.png'), key: "4" },
-        { source: require('../assets/penguin.png'), key: "5" },
+        { source: require('../assets/elephant.png'), name: "Elephant", key: "1" },
+        { source: require('../assets/hen.png'), name: "Hen", key: "2" },
+        { source: require('../assets/koala.png'), name: "Koala", key: "3" },
+        { source: require('../assets/owl.png'), name: "Owl", key: "4" },
+        { source: require('../assets/penguin.png'), name: "Penguin", key: "5" },
     ]);
 
     React.useEffect(() => {
         if (route.params?.animalReward) {
+            
             setModalVisible(!modalVisible)
         }
     }, [route.params?.animalReward]);
@@ -91,9 +96,9 @@ export default function Home({ route, navigation }) {
             </View>
             <View style={globalStyles.container}>
                 <ThemeProvider theme={theme}>
-                    <Button title="1 hour" onPress={() => navigation.navigate('Timer', { cycle: 4 })} />
-                    <Button title="2 hours" onPress={() => navigation.navigate('Timer', { cycle: 8 })} />
-                    <Button title="3 hours" onPress={() => navigation.navigate('Timer', { cycle: 12 })} />
+                    <Button title="1 hour" onPress={() => navigation.navigate('Timer', { cycle: 4, animal: selectedAnimal })} />
+                    <Button title="2 hours" onPress={() => navigation.navigate('Timer', { cycle: 8, animal: selectedAnimal })} />
+                    <Button title="3 hours" onPress={() => navigation.navigate('Timer', { cycle: 12, animal: selectedAnimal })} />
                 </ThemeProvider>
                 <View style={styles.centeredView}>
                     <Modal
