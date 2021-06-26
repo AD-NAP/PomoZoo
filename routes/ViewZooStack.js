@@ -4,14 +4,17 @@ import { createStackNavigator } from '@react-navigation/stack';
 import ViewZoo from '../screens/ViewZoo';
 const { Navigator, Screen } = createStackNavigator();
 
-const ViewZooStack = ({ navigation }) =>(
-    <Navigator>
-        <Screen name="ViewZoo" component={ViewZoo} options={{
-            headerStyle:{
-                height: 90
-            },  
-            headerTitle: () => <Header navigation={navigation} title='ViewZoo Page' />,
-        }} />
+const ViewZooStack = ({ route }) =>(
+    <Navigator screenOptions={{
+        headerStyle: {
+          backgroundColor: '#8682f2',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }}>
+        <Screen name="View Zoo" component={ViewZoo} initialParams={{user: route.params.user}}/>
     </Navigator>
 );
 export default ViewZooStack;

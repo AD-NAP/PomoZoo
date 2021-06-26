@@ -21,13 +21,15 @@ export const globalStyles = StyleSheet.create({
     },
     animalContainer: {
         flex: 1,
-        alignItems: "center",
+        alignItems: 'flex-end',
+        marginTop: 20,
     },
     item: {
+        justifyContent: 'center',
+        alignItems: 'center',
         fontSize: 28,
-        width: 120,
+        width: "32.3%",
         height: 120,
-        margin: 2,
     },
     image: {
         alignItems: 'center',
@@ -60,7 +62,12 @@ export const globalStyles = StyleSheet.create({
         alignItems: "center",
         marginTop: 22
     },
+    lottieView: {
+        
+    },
     modalView: {
+        height: 300,
+        width: 350,
         margin: 20,
         backgroundColor: "white",
         borderRadius: 20,

@@ -5,20 +5,19 @@ import Home from '../screens/Home';
 import Timer from '../screens/Timer';
 const { Navigator, Screen } = createStackNavigator();
 
-const TimerStack = ({ navigation }) =>(
-    <Navigator>
-        <Screen name="Home" component={Home} options={{
-            headerStyle:{
-                height: 90
-            },  
-            headerTitle: () => <Header navigation={navigation} title='Home Page' />,
-        }} />
-        <Screen 
-        name="Timer" 
-        component={Timer}
-        options={{
-            headerTitle: 'Timer Page',
-        }} />
+const TimerStack = ({ route, navigation }) => {
+    return (
+    <Navigator screenOptions={{
+        headerStyle: {
+          backgroundColor: '#8682f2',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }}>
+        <Screen name="Home" component={Home} initialParams={{user: route.params.user}}/>
+        <Screen name="Timer" component={Timer}/>
     </Navigator>
-);
+)};
 export default TimerStack;

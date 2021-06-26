@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, Modal, StyleSheet, View, Text, Pressable, SafeAreaView, FlatList, TouchableOpacity, Image } from 'react-native';
+import LottieView from 'lottie-react-native';
 import { CommonActions } from '@react-navigation/native';
 import { ThemeProvider, Button } from 'react-native-elements';
 import { globalStyles } from '../styles/global';
@@ -10,16 +11,29 @@ export default function Home({ route, navigation }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
     const [selectedAnimal, setSelectedAnimal] = useState(null);
-
-    const Item = ({ item, onPress, backgroundColor, textColor }) => (
-        <TouchableOpacity onPress={onPress} style={[globalStyles.item, backgroundColor]}>
+    const [images, setimages] = useState([
+        { source: require('../assets/elephant.png'), name: "Elephant", key: "0" },
+        { source: require('../assets/hen.png'), name: "Hen", key: "1" },
+        { source: require('../assets/koala.png'), name: "Koala", key: "2" },
+        { source: require('../assets/owl.png'), name: "Owl", key: "3" },
+        { source: require('../assets/penguin.png'), name: "Penguin", key: "4" },
+        { source: require('../assets/panda.png'), name: "Panda", key: "5" },
+        { source: require('../assets/monkey.png'), name: "Monkey", key: "6" },
+        { source: require('../assets/rhino.png'), name: "Rhino", key: "7" },
+        { source: require('../assets/sloth.png'), name: "Sloth", key: "8" },
+        { source: require('../assets/lion.png'), name: "Lion", key: "9" },
+        { source: require('../assets/snake.png'), name: "Sion", key: "10" },
+    ]);
+    const user = route.params.user;
+    const Item = ({ item, onPress, backgroundColor, borderColor, borderWidth }) => (
+        <TouchableOpacity onPress={onPress} style={[globalStyles.item, backgroundColor, borderColor, borderWidth]}>
             <Image source={item.source}
                 key={item.key}
                 style={{
-                    width: 120,
-                    height: 120,
-                    borderWidth: 2,
-                    borderColor: '#d35647',
+                    alignContent: 'center',
+                    justifyContent: 'center',
+                    width: 100,
+                    height: 100,
                 }}
             />
             {/* <Text style={[globalStyles.item, textColor]}>{item.name}</Text> */}
@@ -27,7 +41,10 @@ export default function Home({ route, navigation }) {
     );
 
     const renderItem = ({ item }) => {
-        const backgroundColor = item.key === selectedId ? "#f28482" : "#8682f2";
+        //const backgroundColor = item.key === selectedId ? "#f28482" : "#8682f2";
+        const backgroundColor = "#f28482"
+        const borderColor = item.key === selectedId ? "#8682f2" : "#f28482";
+        const borderWidth = item.key === selectedId ? 4 : 0;
         // const color = item.key === selectedId ? 'white' : 'black';
 
         return (
@@ -37,26 +54,61 @@ export default function Home({ route, navigation }) {
                     setSelectedId(item.key);
                     setSelectedAnimal(item.name);
                 }}
-                backgroundColor={{ backgroundColor }}
-                // textColor={{ color }}
+                backgroundColor={{backgroundColor}}
+                borderColor={{borderColor}}
+                borderWidth={{borderWidth}}
+            // textColor={{ color }}
             />
         );
     };
 
-    const [images, setimages] = useState([
-        { source: require('../assets/elephant.png'), name: "Elephant", key: "1" },
-        { source: require('../assets/hen.png'), name: "Hen", key: "2" },
-        { source: require('../assets/koala.png'), name: "Koala", key: "3" },
-        { source: require('../assets/owl.png'), name: "Owl", key: "4" },
-        { source: require('../assets/penguin.png'), name: "Penguin", key: "5" },
-    ]);
-
     React.useEffect(() => {
-        if (route.params?.animalReward) {
-            
-            setModalVisible(!modalVisible)
+        if (route.params?.animalNum) {
+            const animalNum = route.params.animalNum;
+            const animalName = route.params?.animalName;
+            const animalKey = images.filter(animal => [animalName].includes(animal.name));
+            const updateFirestore = async () => {
+                const animalRef = await firebase.firestore().collection('users')
+                    .doc(user.id)
+                    .collection('animals')
+                    .doc(animalName)
+
+                const updateData = await animalRef.get()
+                    .then(firestoreDocument => {
+                        if (!firestoreDocument.exists) {
+                            animalRef.set({ num: animalNum, key: animalKey[0].key})
+                        } else {
+                            firebase.firestore().runTransaction(async transaction => {
+                                const postSnapshot = await transaction.get(animalRef);
+
+                                if (!postSnapshot.exists) {
+                                    throw 'Post does not exist!';
+                                }
+                                else {
+                                    transaction.update(animalRef, {
+                                        num: postSnapshot.data().num + animalNum,
+                                    })
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Alert.alert(error)
+                    });
+
+
+            }
+            updateFirestore().then(setModalVisible(!modalVisible))
         }
-    }, [route.params?.animalReward]);
+    }, [route.params?.animalNum]);
+
+    const handleTimer = (num) => {
+        if (selectedAnimal == null) {
+            Alert.alert("Please choose an animal")
+        } else {
+            navigation.navigate('Timer', { cycle: num, animal: selectedAnimal })
+        }
+    }
 
     const showModal = () => {
         setModalVisible(!modalVisible);
@@ -69,20 +121,7 @@ export default function Home({ route, navigation }) {
             console.log(error);
         }
     }
-
-    const theme = {
-        Button: {
-            raised: true,
-            containerStyle: {
-                margin: 20,
-            },
-            buttonStyle: {
-                backgroundColor: '#8682f2',
-                height: 48,
-            }
-        },
-    };
-
+    
     return (
         <SafeAreaView style={globalStyles.container}>
             <View style={globalStyles.container}>
@@ -96,9 +135,9 @@ export default function Home({ route, navigation }) {
             </View>
             <View style={globalStyles.container}>
                 <ThemeProvider theme={theme}>
-                    <Button title="1 hour" onPress={() => navigation.navigate('Timer', { cycle: 4, animal: selectedAnimal })} />
-                    <Button title="2 hours" onPress={() => navigation.navigate('Timer', { cycle: 8, animal: selectedAnimal })} />
-                    <Button title="3 hours" onPress={() => navigation.navigate('Timer', { cycle: 12, animal: selectedAnimal })} />
+                    <Button title="1 hour" onPress={() => handleTimer(4)}/>
+                    <Button title="2 hours" onPress={() => handleTimer(8)} />
+                    <Button title="3 hours" onPress={() => handleTimer(12)} />
                 </ThemeProvider>
                 <View style={styles.centeredView}>
                     <Modal
@@ -112,16 +151,26 @@ export default function Home({ route, navigation }) {
                     >
                         <View style={globalStyles.centeredView}>
                             <View style={globalStyles.modalView}>
-                                <Text>Congratulations! You are awarded with {route.params?.animalReward} </Text>
-                                <Pressable
-                                    style={[styles.button, styles.buttonClose]}
-                                    onPress={() => {
-                                        setModalVisible(!modalVisible);
-                                        navigation.dispatch(CommonActions.setParams({ animalReward: undefined }));
-                                    }}
-                                >
-                                    <Text style={styles.textStyle}>Okay</Text>
-                                </Pressable>
+                                <View style={{ flex: 5 }}>
+                                    <Text style={{ alignSelf: "center" }}>Congratulations!</Text>
+                                    <Text>You are awarded with {route.params?.animalNum} {route.params?.animalName}</Text>
+                                    <LottieView
+                                        source={require('../assets/award.json')}
+                                        autoPlay
+                                        loop
+                                    />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Pressable
+                                        style={[styles.button, styles.buttonClose]}
+                                        onPress={() => {
+                                            setModalVisible(!modalVisible);
+                                            navigation.dispatch(CommonActions.setParams({ animalName: undefined, animalNum: undefined }));
+                                        }}
+                                    >
+                                        <Text style={styles.textStyle}>Okay</Text>
+                                    </Pressable>
+                                </View>
                             </View>
                         </View>
                     </Modal>
@@ -136,13 +185,8 @@ const styles = StyleSheet.create({
     button: {
         borderRadius: 20,
         padding: 10,
-        elevation: 2
-    },
-    buttonOpen: {
-        backgroundColor: "#F194FF",
-    },
-    buttonClose: {
-        backgroundColor: "#2196F3",
+        elevation: 2,
+        backgroundColor: "#f28482",
     },
     textStyle: {
         color: "white",
@@ -154,3 +198,16 @@ const styles = StyleSheet.create({
         textAlign: "center"
     }
 });
+
+const theme = {
+    Button: {
+        raised: true,
+        containerStyle: {
+            margin: 20,
+        },
+        buttonStyle: {
+            backgroundColor: '#f28482',
+            height: 48,
+        }
+    },
+};

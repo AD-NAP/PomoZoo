@@ -10,6 +10,7 @@ export default function Login({ navigation }) {
     const [password, setPassword] = useState("");
     const [isLoading, setLoading] = useState(false);
     const ref_password = useRef();
+    //let user;
 
     const handleLogin = () => {
         setLoading(true);
@@ -27,7 +28,7 @@ export default function Login({ navigation }) {
                             alert("User does not exist anymore.")
                             return;
                         }
-                        const user = firestoreDocument.data()
+                        //user = firestoreDocument.data();
                     })
                     .catch(error => {
                         alert(error)
