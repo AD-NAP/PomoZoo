@@ -1,23 +1,30 @@
 import React, { useState, useRef } from 'react';
-import { Keyboard, SafeAreaView, TouchableWithoutFeedback, View } from 'react-native';
+import { Keyboard, SafeAreaView, TouchableWithoutFeedback, View, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { ThemeProvider, Input, Image, Button } from 'react-native-elements';
 import { globalStyles } from '../styles/global';
 import { firebase } from '../api/firebase';
 
 export default function Login({ navigation }) {
+    /**
+     * useState hooks to store variables of email, password and loading status. 
+     * useRef used to improve UX when filling up their credentials 
+     */
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setLoading] = useState(false);
     const ref_password = useRef();
-    //let user;
 
+    /**
+     * Function to handle when user press the login button 
+     */
     const handleLogin = () => {
-        setLoading(true);
+        setLoading(true); //Set loading to true, this lets the login button display a loading status animation
         firebase
             .auth()
-            .signInWithEmailAndPassword(email, password)
+            .signInWithEmailAndPassword(email, password) //Sign in with Firebase Auth 
             .then((response) => {
+                //Get the data of the user from firestore database after user has successfully logged in
                 const uid = response.user.uid
                 const usersRef = firebase.firestore().collection('users')
                 usersRef
@@ -28,7 +35,6 @@ export default function Login({ navigation }) {
                             alert("User does not exist anymore.")
                             return;
                         }
-                        //user = firestoreDocument.data();
                     })
                     .catch(error => {
                         alert(error)
@@ -59,7 +65,8 @@ export default function Login({ navigation }) {
         Button: {
             buttonStyle: {
                 backgroundColor: '#8682f2',
-                height: 48,
+                height: 50,
+                marginBottom: 20,
             }
         },
     };
@@ -103,6 +110,7 @@ export default function Login({ navigation }) {
                             loading={isLoading}
                             onPress={handleLogin}
                         />
+                        <Text style={globalStyles.footerText}>Need an account? <Text onPress={() => navigation.navigate('SignUp')} style={globalStyles.footerLink}>Register here.</Text></Text>
                     </ThemeProvider>
                 </View>
             </TouchableWithoutFeedback>

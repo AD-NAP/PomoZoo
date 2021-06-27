@@ -7,10 +7,13 @@ import { globalStyles } from '../styles/global';
 import { firebase } from '../api/firebase';
 
 export default function Home({ route, navigation }) {
-
+    //Boolean for visibility of modal
     const [modalVisible, setModalVisible] = useState(false);
+    //The id of the animal selected
     const [selectedId, setSelectedId] = useState(null);
+    //The name of the animal selected
     const [selectedAnimal, setSelectedAnimal] = useState(null);
+    //An array of objects containing the image, name and key of the animals
     const [images, setimages] = useState([
         { source: require('../assets/elephant.png'), name: "Elephant", key: "0" },
         { source: require('../assets/hen.png'), name: "Hen", key: "1" },
@@ -22,11 +25,23 @@ export default function Home({ route, navigation }) {
         { source: require('../assets/rhino.png'), name: "Rhino", key: "7" },
         { source: require('../assets/sloth.png'), name: "Sloth", key: "8" },
         { source: require('../assets/lion.png'), name: "Lion", key: "9" },
-        { source: require('../assets/snake.png'), name: "Sion", key: "10" },
+        { source: require('../assets/snake.png'), name: "Snake", key: "10" },
     ]);
+    
+    //User data retrieved from the route.params object
     const user = route.params.user;
+
+    /**
+     * 
+     * @param {Object} item The object that contains the data of each item.
+     * @param {Function} onPress The function to handle when the item is pressed.
+     * @param {String} backgroundColor The string that contains the color of the background.
+     * @param {String} borderColor The string that contains the color of the border. Pink by default, purple if item is selected.
+     * @param {Number} borderWidth The number that defines the border width. 0 by default, 4 if item is selected.
+     * @returns 
+     */
     const Item = ({ item, onPress, backgroundColor, borderColor, borderWidth }) => (
-        <TouchableOpacity onPress={onPress} style={[globalStyles.item, backgroundColor, borderColor, borderWidth]}>
+        <TouchableOpacity onPress={onPress} activeOpacity={1} style={[globalStyles.item, backgroundColor, borderColor, borderWidth]}>
             <Image source={item.source}
                 key={item.key}
                 style={{
@@ -40,12 +55,15 @@ export default function Home({ route, navigation }) {
         </TouchableOpacity>
     );
 
+    /**
+     * Function to render each Item from the Flatlist to have a border when the item is selected.
+     * @param {Object} item The object that is passed as data from Flatlist
+     * @returns The Item component defined previously.
+     */
     const renderItem = ({ item }) => {
-        //const backgroundColor = item.key === selectedId ? "#f28482" : "#8682f2";
         const backgroundColor = "#f28482"
         const borderColor = item.key === selectedId ? "#8682f2" : "#f28482";
         const borderWidth = item.key === selectedId ? 4 : 0;
-        // const color = item.key === selectedId ? 'white' : 'black';
 
         return (
             <Item
@@ -57,27 +75,37 @@ export default function Home({ route, navigation }) {
                 backgroundColor={{backgroundColor}}
                 borderColor={{borderColor}}
                 borderWidth={{borderWidth}}
-            // textColor={{ color }}
             />
         );
     };
 
     React.useEffect(() => {
+        /*
+        Check if parameter of animalNum has been updated upon component mounting. The variable animalNum
+        will only be updated upon timer completion from the timer screen. Hence it will only run the following
+        codes if the timer is completed.
+        */
         if (route.params?.animalNum) {
-            const animalNum = route.params.animalNum;
-            const animalName = route.params?.animalName;
-            const animalKey = images.filter(animal => [animalName].includes(animal.name));
-            const updateFirestore = async () => {
-                const animalRef = await firebase.firestore().collection('users')
+            const animalNum = route.params.animalNum; //Get the number of animals to be rewarded
+            const animalName = route.params?.animalName; //Get the name of the animal selected previously 
+            const animalKey = images.filter(animal => [animalName].includes(animal.name)); //Get the key of the animal by filtering with the animal name
+
+            // Function to update the data into Firestore database
+            const updateFirestore = async () => { 
+                const animalRef = await firebase.firestore().collection('users') //Reference of the users collection
                     .doc(user.id)
                     .collection('animals')
                     .doc(animalName)
 
-                const updateData = await animalRef.get()
+                //Update the number of animal in the firestore 
+                const updateData = await animalRef.get() 
                     .then(firestoreDocument => {
+                        //If the animal document does not exist, then create a new document with the animal name and data 
+                        //This allows adding more animals in the future without changing the codes 
                         if (!firestoreDocument.exists) {
                             animalRef.set({ num: animalNum, key: animalKey[0].key})
                         } else {
+                            //If animal document already exist, then run transaction to increment the number of animals accordingly 
                             firebase.firestore().runTransaction(async transaction => {
                                 const postSnapshot = await transaction.get(animalRef);
 
@@ -98,10 +126,16 @@ export default function Home({ route, navigation }) {
 
 
             }
+            //Run the updateFirestore function and then show the user the modal 
             updateFirestore().then(setModalVisible(!modalVisible))
         }
     }, [route.params?.animalNum]);
 
+    /*
+    Function to handle the onPress of the timer buttons. Navigate to timer page 
+    with the number of cycles of timer and the animal selected. If user has yet to 
+    select any animal, alert the user to do so without navigating. 
+    */
     const handleTimer = (num) => {
         if (selectedAnimal == null) {
             Alert.alert("Please choose an animal")
@@ -110,10 +144,9 @@ export default function Home({ route, navigation }) {
         }
     }
 
-    const showModal = () => {
-        setModalVisible(!modalVisible);
-    }
-
+    /*
+    Function to handle the log out process when the logout button is pressed.  
+    */
     const handleLogout = async () => {
         try {
             await firebase.auth().signOut();
@@ -138,6 +171,7 @@ export default function Home({ route, navigation }) {
                     <Button title="1 hour" onPress={() => handleTimer(4)}/>
                     <Button title="2 hours" onPress={() => handleTimer(8)} />
                     <Button title="3 hours" onPress={() => handleTimer(12)} />
+                    <Button title="Log out" onPress={handleLogout} buttonStyle={{backgroundColor: '#8682f2'}}/>
                 </ThemeProvider>
                 <View style={styles.centeredView}>
                     <Modal
@@ -175,7 +209,6 @@ export default function Home({ route, navigation }) {
                         </View>
                     </Modal>
                 </View>
-                <Text style={globalStyles.paragraph} onPress={handleLogout} >LOG OUT  <Text style={globalStyles.paragraph} onPress={showModal} >Show Modal</Text></Text>
             </View>
         </SafeAreaView>
     )

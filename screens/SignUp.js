@@ -6,6 +6,12 @@ import { globalStyles } from '../styles/global';
 import { firebase } from '../api/firebase';
 
 export default function SignUp({ navigation }) {
+    /**
+     * useState hooks to store variables of full name, email, password, 
+     * confirm password and loading status. 
+     * 
+     * useRef used to improve UX when filling up their credentials 
+     */
     const [fullName, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -15,17 +21,23 @@ export default function SignUp({ navigation }) {
     const ref_password = useRef();
     const ref_confirmPassword = useRef();
 
+    /**
+     * Function to handle when user press the Sign up button 
+     */
     const handleRegister = () => {
+        //Check if password typed matches the confirm password, added to improve UX in ensuring 
+        //that their password is typed correctly. 
         if (password !== confirmPassword) {
             alert("Passwords don't match.")
             return
         }
-        setLoading(true);
+        setLoading(true); //Set loading to true, this lets the sign up button display a loading status animation
         firebase
             .auth()
-            .createUserWithEmailAndPassword(email, password)
+            .createUserWithEmailAndPassword(email, password) //Create new user with Firebase Auth 
             .then((response) => {
                 const uid = response.user.uid
+                //data of user to be stored in firestore
                 const data = {
                     id: uid,
                     email,
@@ -34,10 +46,7 @@ export default function SignUp({ navigation }) {
                 const usersRef = firebase.firestore().collection('users')
                 usersRef
                     .doc(uid)
-                    .set(data)
-                    .then(() => {
-                        navigation.navigate('Home', { user: data })
-                    })
+                    .set(data) //Write the data of the new user in firestore 
                     .catch((error) => {
                         alert(error)
                     });
@@ -67,7 +76,7 @@ export default function SignUp({ navigation }) {
         Button: {
             buttonStyle: {
                 backgroundColor: '#8682f2',
-                height: 48,
+                height: 50,
                 marginBottom: 20,
             }
         },

@@ -4,9 +4,13 @@ import { globalStyles } from '../styles/global';
 import { firebase } from '../api/firebase';
 
 export default function ViewZoo({ route }) {
+    //User data retrieved from the route.params object
     const user = route.params.user;
+    //The loading status 
     const [loading, setLoading] = useState(true);
+    //The data used by Flatlist to list down the animals collected by the user
     const [animals, setAnimals] = useState([]);
+    //An array of objects containing the image, name and key of the animals
     const [images, setimages] = useState([
         { source: require('../assets/elephant.png'), name: "Elephant", key: "0" },
         { source: require('../assets/hen.png'), name: "Hen", key: "1" },
@@ -18,9 +22,13 @@ export default function ViewZoo({ route }) {
         { source: require('../assets/rhino.png'), name: "Rhino", key: "7" },
         { source: require('../assets/sloth.png'), name: "Sloth", key: "8" },
         { source: require('../assets/lion.png'), name: "Lion", key: "9" },
-        { source: require('../assets/snake.png'), name: "Sion", key: "10" },
+        { source: require('../assets/snake.png'), name: "Snake", key: "10" },
     ]);
-
+    
+    /** 
+     * Upon component mount, get the collections of animals tied to the current user and push
+     * the data into an array which will be stored in the useState of animals variable. 
+     */
     useEffect(() => {
         return firebase.firestore().collection('users')
             .doc(user.id)
@@ -45,6 +53,11 @@ export default function ViewZoo({ route }) {
         return <ActivityIndicator />;
     }
 
+    /**
+     * 
+     * @param {Object} item The item object that contains the animal name, image and amount collected 
+     * @returns A component for each item in the list that displays the image, name and amount collected
+     */
     const Item = ({ item }) => {
         return (
             <View style={globalStyles.container} style={{ backgroundColor: "#f28482", margin: 20 }}>
@@ -73,6 +86,11 @@ export default function ViewZoo({ route }) {
         )
     };
 
+    /**
+     * 
+     * @param {Object} item The object that is passed as data from Flatlist.
+     * @returns The Item component defined previously.
+     */
     const renderItem = ({ item }) => {
         return (
             <Item item={item} />

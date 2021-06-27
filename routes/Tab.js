@@ -14,14 +14,13 @@ import { decode, encode } from 'base-64';
 if (!global.btoa) { global.btoa = encode }
 if (!global.atob) { global.atob = decode }
 
-
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 export default function App() {
 
   const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(null) //Information of users will be stored in user
 
   if (loading) {
     return (
@@ -30,9 +29,12 @@ export default function App() {
   }
 
   useEffect(() => {
-    const usersRef = firebase.firestore().collection('users');
+    const usersRef = firebase.firestore().collection('users'); //Reference to the users collection in firestore
+
+    //Checks if there is any auth state change (Sign in and out)
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
+        //User is signed in, hence save the information of the user 
         usersRef
           .doc(user.uid)
           .get()
@@ -45,6 +47,7 @@ export default function App() {
             setLoading(false)
           });
       } else {
+        //User is signed out, hence reset the information stored to null 
         setLoading(false);
         setUser(null);
       }
@@ -53,11 +56,14 @@ export default function App() {
 
   return (
     <NavigationContainer>
+      {/* Checks if user is signed in, if true, show the Tab Navigation that includes Home, Todo and View Zoo stacks.
+      If not, show the Stack Navigation that includes Signup and Login stacks*/}
         {user ? (
           <Tab.Navigator screenOptions={({ route }) => ({
+            //Checks which page is in focused and style the tabBarIcon accordingly 
             tabBarIcon: ({ focused, color, size }) => {
               let iconName;
-  
+
               if (route.name === 'Home') {
                 iconName = focused ? 'ios-stopwatch' : 'ios-stopwatch-outline';
               } else if (route.name === 'Todo') {
@@ -65,8 +71,6 @@ export default function App() {
               } else if (route.name === 'View Zoo') {
                 iconName = focused ? 'md-paw' : 'md-paw-outline';
               }
-  
-              // You can return any component that you like here!
               return <Icon name={iconName} size={size} color={color} />;
             },
           })}
@@ -91,4 +95,3 @@ export default function App() {
     </NavigationContainer>
   );
 }
-//options={{ tabBarVisible: false }}
