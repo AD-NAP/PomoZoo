@@ -14,7 +14,7 @@ export default function Timer({ route, navigation }) {
      */
     const [key, setKey] = useState(cycle - 1);
     //For purposes of demo app, productivity is set to 25 seconds instead of the intended 25 mins 
-    const [duration, setDuration] = useState(5);
+    const [duration, setDuration] = useState(25);
     const [breakTime, setBreakTime] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -43,7 +43,7 @@ export default function Timer({ route, navigation }) {
                                     setModalVisible(!modalVisible);
                                     setDuration(5); //For purposes of demo app, break time is set to 5 seconds instead of the intended 5 mins
                                 } else {
-                                    setDuration(5); //For purposes of demo app, productivity is set to 25 seconds instead of the intended 25 mins 
+                                    setDuration(25); //For purposes of demo app, productivity is set to 25 seconds instead of the intended 25 mins 
                                 }
                                 setKey(prevKey => prevKey - 1)
                                 //After the number of cycles is completed, navigate back home 
