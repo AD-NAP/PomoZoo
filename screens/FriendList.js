@@ -17,19 +17,19 @@ export default function FriendList({ route, navigation }) {
     const usersRef = firebase.firestore().collection('users')
     const friendsRef = firebase.firestore().collection('users').doc(user.id).collection('friends')
 
-    useEffect(() => {
-        const subscriber = friendsRef.onSnapshot((documents) => {
-            const friendsList = [];
-            documents.forEach(documentData => {
-                friendsList.push({
-                    ...documentData.data(),
-                    friendStreak: 2
-                })
-            })
-            setFriends(friendsList);
-        })
-        return () => subscriber()
-    }, []);
+    // useEffect(() => {
+    //     const subscriber = friendsRef.onSnapshot((documents) => {
+    //         const friendsList = [];
+    //         documents.forEach(documentData => {
+    //             friendsList.push({
+    //                 ...documentData.data(),
+    //                 friendStreak: 2
+    //             })
+    //         })
+    //         setFriends(friendsList);
+    //     })
+    //     return () => subscriber()
+    // }, []);
 
 
     // useEffect(() => {
@@ -64,30 +64,30 @@ export default function FriendList({ route, navigation }) {
     //     return () => subscriber()
     // }, []);
 
-    // useEffect(() => {
-    //     const subscriber = friendsRef.onSnapshot((documents) => {
-    //         const friendsList = [];
-    //         let streakNum;
-    //         documents.forEach(documentData => {
-    //             firebase.firestore().collection('users').doc(documentData.data().friendId).get().then(doc => {
-    //                 streakNum = doc.data().streak;
-    //                 if (streakNum != undefined) {
-    //                     friendsList.push({
-    //                         ...documentData.data(),
-    //                         friendStreak: streakNum
-    //                     })
-    //                 } else {
-    //                     friendsList.push({
-    //                         ...documentData.data(),
-    //                         friendStreak: 0
-    //                     })
-    //                 }
-    //             })
-    //         })
-    //         setFriends(friendsList);
-    //     })
-    //     return () => subscriber()
-    // }, []);
+    useEffect(() => {
+        const subscriber = friendsRef.onSnapshot((documents) => {
+            const friendsList = [];
+            let streakNum;
+            documents.forEach(documentData => {
+                firebase.firestore().collection('users').doc(documentData.data().friendId).get().then(doc => {
+                    streakNum = doc.data().streak;
+                    if (streakNum != undefined) {
+                        friendsList.push({
+                            ...documentData.data(),
+                            friendStreak: streakNum
+                        })
+                    } else {
+                        friendsList.push({
+                            ...documentData.data(),
+                            friendStreak: 0
+                        })
+                    }
+                })
+            })
+            setFriends(friendsList);
+        })
+        return () => subscriber()
+    }, []);
 
     // useEffect(() => {
     //     console.log(friends)
