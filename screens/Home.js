@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { Alert, Modal, StyleSheet, View, Text, Pressable, SafeAreaView, FlatList, TouchableOpacity, Image } from 'react-native';
+import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
+import { Alert, Modal, StyleSheet, View, Text, Pressable, SafeAreaView, FlatList, TouchableOpacity, Image, Platform, Dimensions } from 'react-native';
+import Slider from '@react-native-community/slider';
 import LottieView from 'lottie-react-native';
 import { CommonActions } from '@react-navigation/native';
 import { ThemeProvider, Button } from 'react-native-elements';
 import { globalStyles } from '../styles/global';
 import { firebase } from '../api/firebase';
+import { lastDayOfYear } from 'date-fns';
 
 export default function Home({ route, navigation }) {
     //Boolean for visibility of modal
@@ -27,9 +31,74 @@ export default function Home({ route, navigation }) {
         { source: require('../assets/lion.png'), name: "Lion", key: "9" },
         { source: require('../assets/snake.png'), name: "Snake", key: "10" },
     ]);
-    
+    // Custom value 
+    const [customTimer, setCustomTimer] = useState(0.5);
+    //Expo Notif Token
+    const [token, setToken] = useState(null);
     //User data retrieved from the route.params object
     const user = route.params.user;
+
+    // const registerForPushNotificationsAsync = async () => {
+    //     if (Constants.isDevice) {
+    //       const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    //       let finalStatus = existingStatus;
+    //       if (existingStatus !== 'granted') {
+    //         const { status } = await Notifications.requestPermissionsAsync();
+    //         finalStatus = status;
+    //       }
+    //       if (finalStatus !== 'granted') {
+    //         alert('Failed to get push token for push notification!');
+    //         return;
+    //       }
+    //       const token = (await Notifications.getExpoPushTokenAsync()).data;
+    //       console.log(token);
+    //       this.setState({ expoPushToken: token });
+    //     } else {
+    //       alert('Must use physical device for Push Notifications');
+    //     }
+
+    //     if (Platform.OS === 'android') {
+    //       Notifications.setNotificationChannelAsync('default', {
+    //         name: 'default',
+    //         importance: Notifications.AndroidImportance.MAX,
+    //         vibrationPattern: [0, 250, 250, 250],
+    //         lightColor: '#FF231F7C',
+    //       });
+    //     }
+    // };
+
+    React.useEffect(() => {
+        async function registerForPushNotificationsAsync() {
+            if (Constants.isDevice) {
+                const { status: existingStatus } = await Notifications.getPermissionsAsync();
+                let finalStatus = existingStatus;
+                if (existingStatus !== 'granted') {
+                    const { status } = await Notifications.requestPermissionsAsync();
+                    finalStatus = status;
+                }
+                if (finalStatus !== 'granted') {
+                    alert('Failed to get push token for push notification!');
+                    return;
+                }
+                const token = (await Notifications.getExpoPushTokenAsync()).data;
+                // console.log(token);
+                setToken(token);
+                //this.setState({ expoPushToken: token });
+            } else {
+                alert('Must use physical device for Push Notifications');
+            }
+
+            if (Platform.OS === 'android') {
+                Notifications.setNotificationChannelAsync('default', {
+                    name: 'default',
+                    importance: Notifications.AndroidImportance.MAX,
+                    vibrationPattern: [0, 250, 250, 250],
+                    lightColor: '#FF231F7C',
+                });
+            }
+        }
+        registerForPushNotificationsAsync();
+    }, [])
 
     /**
      * 
@@ -72,12 +141,13 @@ export default function Home({ route, navigation }) {
                     setSelectedId(item.key);
                     setSelectedAnimal(item.name);
                 }}
-                backgroundColor={{backgroundColor}}
-                borderColor={{borderColor}}
-                borderWidth={{borderWidth}}
+                backgroundColor={{ backgroundColor }}
+                borderColor={{ borderColor }}
+                borderWidth={{ borderWidth }}
             />
         );
     };
+
 
     React.useEffect(() => {
         /*
@@ -91,19 +161,19 @@ export default function Home({ route, navigation }) {
             const animalKey = images.filter(animal => [animalName].includes(animal.name)); //Get the key of the animal by filtering with the animal name
 
             // Function to update the data into Firestore database
-            const updateFirestore = async () => { 
+            const updateFirestore = async () => {
                 const animalRef = await firebase.firestore().collection('users') //Reference of the users collection
                     .doc(user.id)
                     .collection('animals')
                     .doc(animalName)
 
                 //Update the number of animal in the firestore 
-                const updateData = await animalRef.get() 
+                const updateData = await animalRef.get()
                     .then(firestoreDocument => {
                         //If the animal document does not exist, then create a new document with the animal name and data 
                         //This allows adding more animals in the future without changing the codes 
                         if (!firestoreDocument.exists) {
-                            animalRef.set({ num: animalNum, key: animalKey[0].key})
+                            animalRef.set({ num: animalNum, key: animalKey[0].key })
                         } else {
                             //If animal document already exist, then run transaction to increment the number of animals accordingly 
                             firebase.firestore().runTransaction(async transaction => {
@@ -124,6 +194,40 @@ export default function Home({ route, navigation }) {
                         Alert.alert(error)
                     });
 
+                const getDate = await firebase.firestore().collection('users').doc(user.id).get().then(doc => {
+                    const lastUse = doc.data().lastUse?.toDate()
+                    if (lastUse == undefined) {
+                        const updateDate = firebase.firestore().collection('users').doc(user.id).update({
+                            lastUse: firebase.firestore.FieldValue.serverTimestamp(),
+                            streak: animalNum
+                        }).catch(error => {
+                            Alert.alert(error)
+                        })
+                    } else {
+                        const today = new Date()
+                        console.log(today - lastUse)
+                        if ((today - lastUse) > (24 * 60 * 60 * 1000)) {
+                            const updateStreak = firebase.firestore().collection('users').doc(user.id).update({
+                                lastUse: firebase.firestore.FieldValue.serverTimestamp(),
+                                streak: animalNum
+                            }).catch(error => {
+                                Alert.alert(error)
+                            })
+                        } else {
+                            const updateStreak = firebase.firestore().collection('users').doc(user.id).update({
+                                lastUse: firebase.firestore.FieldValue.serverTimestamp(),
+                                streak: firebase.firestore.FieldValue.increment(animalNum)
+                            }).catch(error => {
+                                Alert.alert(error)
+                            })
+                        }
+                    }
+                }).catch(error => {
+                    Alert.alert(error)
+                });
+
+                
+
 
             }
             //Run the updateFirestore function and then show the user the modal 
@@ -140,7 +244,7 @@ export default function Home({ route, navigation }) {
         if (selectedAnimal == null) {
             Alert.alert("Please choose an animal")
         } else {
-            navigation.navigate('Timer', { cycle: num, animal: selectedAnimal })
+            navigation.navigate('Timer', { cycle: num, animal: selectedAnimal, token: token })
         }
     }
 
@@ -154,7 +258,7 @@ export default function Home({ route, navigation }) {
             console.log(error);
         }
     }
-    
+
     return (
         <SafeAreaView style={globalStyles.container}>
             <View style={globalStyles.container}>
@@ -168,10 +272,20 @@ export default function Home({ route, navigation }) {
             </View>
             <View style={globalStyles.container}>
                 <ThemeProvider theme={theme}>
-                    <Button title="1 hour" onPress={() => handleTimer(4)}/>
+                    <Slider
+                        step={0.5}
+                        style={{ width: "90%", height: 40, alignSelf: "center" }}
+                        onValueChange={val => setCustomTimer(val)}
+                        minimumValue={0.5}
+                        maximumValue={5}
+                        minimumTrackTintColor="#f28482"
+                        maximumTrackTintColor="#8682f2"
+                    />
+                    <Button title={"Custom: " + customTimer + " hours"} onPress={() => handleTimer(customTimer * 4)} />
+                    <Button title="1 hour" onPress={() => handleTimer(4)} />
                     <Button title="2 hours" onPress={() => handleTimer(8)} />
                     <Button title="3 hours" onPress={() => handleTimer(12)} />
-                    <Button title="Log out" onPress={handleLogout} buttonStyle={{backgroundColor: '#8682f2'}}/>
+                    {/* <Button title="Log out" onPress={handleLogout} buttonStyle={{ backgroundColor: '#8682f2' }} /> */}
                 </ThemeProvider>
                 <View style={styles.centeredView}>
                     <Modal
@@ -236,11 +350,11 @@ const theme = {
     Button: {
         raised: true,
         containerStyle: {
-            margin: 20,
+            margin: 10,
         },
         buttonStyle: {
             backgroundColor: '#f28482',
-            height: 48,
+            height: Dimensions.get('window').height * 0.06 ,
         }
     },
 };

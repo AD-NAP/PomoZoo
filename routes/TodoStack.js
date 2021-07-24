@@ -10,7 +10,7 @@ const { Navigator, Screen } = createStackNavigator();
  * Placed in a stack so that each component in the Tab Navigation are stack components. 
  * @returns The stack that has the Todo screen. 
  */
-const TodoStack = () => {
+const TodoStack = ({ route }) => {
     return (
         <Navigator screenOptions={{
             headerStyle: {
@@ -21,7 +21,7 @@ const TodoStack = () => {
               fontWeight: 'bold',
             },
           }}>
-            <Screen name="Todo" component={Todo}/>
+            <Screen name="Todo" component={Todo} initialParams={{user: route.params.user}}/>
         </Navigator>
     )};
 export default TodoStack;

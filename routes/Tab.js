@@ -81,7 +81,7 @@ export default function App() {
           initialRouteName="Home"
           >
           <>
-            <Tab.Screen name="Todo" component={TodoStack} />
+            <Tab.Screen name="Todo" component={TodoStack} initialParams={{user: user}}/>
             <Tab.Screen name="Home" component={TimerStack} initialParams={{user: user}}/>
             <Tab.Screen name="View Zoo" component={ViewZooStack} initialParams={{user: user}}/>
           </>
@@ -91,7 +91,6 @@ export default function App() {
           <Stack.Screen name="Login" component={LoginStack} options={{headerShown: false}} />
           </Stack.Navigator>
         )}
-      
     </NavigationContainer>
   );
 }

@@ -41,8 +41,19 @@ export default function Login({ navigation }) {
                     });
             })
             .catch(error => {
+                switch(error.code) {
+                    case 'auth/user-not-found':
+                        alert('Invalid user')
+                        break;
+                    case 'auth/wrong-password':
+                        alert('Wrong password')
+                        break;
+                    default: 
+                        alert(error)
+                 }
                 setLoading(false);
-                alert(error)
+                console.log(error.code)
+                //alert(error)
             })
     }
 
